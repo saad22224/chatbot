@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        :root {
+            --bg-color: #f0f4f9;
+            --text-color: #000;
+            --input-bg: #fff;
+            --message-bg: #d1e7ff;
+            --answer-bg: #e9ecef;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #fff;
+            --input-bg: #1e1e1e;
+            --message-bg: #0066cc;
+            --answer-bg: #333;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--input-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message,
+        .answer {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .message {
+            background-color: var(--message-bg);
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .answer {
+            background-color: var(--answer-bg);
+            align-self: flex-start;
+        }
+
+        form {
+            display: flex;
+            padding: 10px;
+            background: var(--input-bg);
+            border-top: 1px solid #ccc;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            outline: none;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .toggle-theme {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .toggle-theme:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="toggle-theme" onclick="toggleTheme()">🌙</button>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <!-- سيتم إضافة الرسائل هنا ديناميكيًا -->
+        </div>
+        <form id="form">
+            <input type="text" id="name" placeholder="Ask something..." required>
+
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('name');
+        const form = document.getElementById('form');
+        const chatBox = document.getElementById('chat-box');
+
+        // تبديل الوضع الفاتح والمظلم
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            document.body.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const userMessage = document.createElement('div');
+            userMessage.classList.add('message');
+            userMessage.textContent = nameInput.value;
+            chatBox.appendChild(userMessage);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const userText = nameInput.value.toLowerCase();
+
+            fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBPHuU8MWQFj7b3UuStuAd3sY5Ix7ZoCrk", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                { text: userText }
+                            ]
+                        }
+                    ]
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data)
+                    const botMessage = document.createElement('div');
+                    const copy = document.createElement('button');
+                    copy.innerHTML = 'نسخ'
+                    copy.addEventListener('click', () => {
+                        navigator.clipboard.writeText(botMessage.textContent)
+                            .then(() => alert('تم النسخ!'))
+                            .catch(err => console.error('فشل النسخ:', err));
+                    });
+                    botMessage.classList.add('answer');
+                    botMessage.innerHTML = data.candidates[0].content.parts[0].text
+                    chatBox.appendChild(botMessage);
+                    chatBox.appendChild(copy);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                })
+                .catch(error => console.log(error));
+
+            nameInput.value = '';
+        });
+    </script>
+</body>
+
+</html>
