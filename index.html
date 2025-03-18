@@ -144,6 +144,104 @@
         .copy:hover {
             background-color: #0056b3;
         }
+
+        .loader {
+            transform: rotateZ(45deg);
+            perspective: 1000px;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            color: #fff;
+        }
+
+        .loader:before,
+        .loader:after {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: inherit;
+            height: inherit;
+            border-radius: 50%;
+            transform: rotateX(70deg);
+            animation: 1s spin linear infinite;
+        }
+
+        .loader:after {
+            color: #FF3D00;
+            transform: rotateY(70deg);
+            animation-delay: .4s;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: translate(-50%, -50%) rotateZ(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotateZ(360deg);
+            }
+        }
+
+        @keyframes rotateccw {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(-360deg);
+            }
+        }
+
+        @keyframes spin {
+
+            0%,
+            100% {
+                box-shadow: .2em 0px 0 0px currentcolor;
+            }
+
+            12% {
+                box-shadow: .2em .2em 0 0 currentcolor;
+            }
+
+            25% {
+                box-shadow: 0 .2em 0 0px currentcolor;
+            }
+
+            37% {
+                box-shadow: -.2em .2em 0 0 currentcolor;
+            }
+
+            50% {
+                box-shadow: -.2em 0 0 0 currentcolor;
+            }
+
+            62% {
+                box-shadow: -.2em -.2em 0 0 currentcolor;
+            }
+
+            75% {
+                box-shadow: 0px -.2em 0 0 currentcolor;
+            }
+
+            87% {
+                box-shadow: .2em -.2em 0 0 currentcolor;
+            }
+        }
+
+        #loader {
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            display: none;
+            /* width: 100%; */
+            background: var(--answer-bg);
+            position: relative;
+            /* اجعله يتبع تدفق الرسائل */
+            bottom: 0;
+            /* تأكد أنه في الأسفل */
+        }
     </style>
 </head>
 
@@ -152,6 +250,7 @@
     <div class="chat-container">
         <div class="chat-box" id="chat-box">
             <!-- سيتم إضافة الرسائل هنا ديناميكيًا -->
+            <span class="loader" id="loader" style="display: none;"></span>
         </div>
         <form id="form">
             <input type="text" id="name" placeholder="Ask something..." required>
@@ -164,6 +263,7 @@
         const nameInput = document.getElementById('name');
         const form = document.getElementById('form');
         const chatBox = document.getElementById('chat-box');
+        const loader = document.getElementById('loader');
 
         // تبديل الوضع الفاتح والمظلم
         function toggleTheme() {
@@ -173,11 +273,14 @@
 
         form.addEventListener('submit', (event) => {
             event.preventDefault();
+
             const userMessage = document.createElement('div');
             userMessage.classList.add('message');
             userMessage.textContent = nameInput.value;
             chatBox.appendChild(userMessage);
             chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.appendChild(loader);
+            loader.style.display = 'block';
 
             const userText = nameInput.value.toLowerCase();
 
@@ -218,6 +321,7 @@
                     botMessage.appendChild(copy);
                     chatBox.appendChild(botMessage);
                     chatBox.scrollTop = chatBox.scrollHeight;
+                    loader.style.display = 'none'
                 })
 
                 .catch(error => console.log(error));
