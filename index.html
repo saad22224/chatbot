@@ -258,11 +258,14 @@
             <button type="submit" id="send">Send</button>
         </form>
     </div>
-  <footer style="transform: translateY(100%);">
-    <p>
-        developed with ❤️ by <a href="https://wa.me/+201556477029" target="_blank" style="color: #0056b3;">Saad Harera </span>
-    </p>
-  </footer>
+    <footer style="transform: translateY(100%);">
+        <p>
+            developed with ❤️ by <a href="https://wa.me/+201556477029" target="_blank" style="color: #0056b3;">Saad
+                Harera </span>
+        </p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         const nameInput = document.getElementById('name');
         const form = document.getElementById('form');
@@ -320,7 +323,13 @@
 
                     copy.addEventListener('click', () => {
                         navigator.clipboard.writeText(botMessage.textContent)
-                            .then(() => alert('تم النسخ!'))
+                            .then(() => {
+                                Swal.fire({
+                                    // title: "",
+                                    text: "تم نسخ النص الي الحافظة",
+                                    icon: "success"
+                                });
+                            })
                             .catch(err => console.error('فشل النسخ:', err));
                     });
 
