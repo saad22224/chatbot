@@ -264,6 +264,7 @@
         const form = document.getElementById('form');
         const chatBox = document.getElementById('chat-box');
         const loader = document.getElementById('loader');
+        let conversationHistory = []; // تخزين المحادثة
 
         // تبديل الوضع الفاتح والمظلم
         function toggleTheme() {
@@ -283,6 +284,8 @@
             loader.style.display = 'block';
 
             const userText = nameInput.value.toLowerCase();
+            conversationHistory.push({ role: "user", text: userText });
+
 
             fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBPHuU8MWQFj7b3UuStuAd3sY5Ix7ZoCrk", {
                 method: 'POST',
@@ -290,18 +293,17 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                { text: userText }
-                            ]
-                        }
-                    ]
+                    contents: conversationHistory.map(entry => ({
+                        role: entry.role,  // إضافة الدور (user أو model)
+                        parts: [{ text: entry.text }]
+                    }))
                 })
             })
                 .then(response => response.json())
                 .then(data => {
                     console.log(data);
+                    const botResponse = data.candidates[0].content.parts[0].text;
+                    conversationHistory.push({ role: "model", text: botResponse }); // تخزين رد البوت
 
                     const botMessage = document.createElement('div');
                     const copy = document.createElement('button');
@@ -322,6 +324,7 @@
                     chatBox.appendChild(botMessage);
                     chatBox.scrollTop = chatBox.scrollHeight;
                     loader.style.display = 'none'
+                    console.log(conversationHistory);
                 })
 
                 .catch(error => console.log(error));
